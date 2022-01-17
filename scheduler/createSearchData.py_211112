@@ -66,61 +66,30 @@ def rm_tag(c):
     return new_string
 
 
-def get_title(service, bs):
-    print('service = %s' %str(service))
-
+def get_title(bs):
     reTitle = ""
+    header = bs.find('header', class_='sub-header')
 
-    if service == 'support':
-        header = bs.find('div', class_='notice-header')
-
-        if header != None:
-            title = header.find('h3')
-            if header.h3 != None:
-                reTitle = rm_tag(header.h3.get_text())
-        else:
-            # contact-us
-            header = bs.find('header', class_='sub-header')
-
-            if header != None:
-                title = header.find('h2')
-                if header.h2 != None:
-                    reTitle = rm_tag(header.h2.get_text())
-    else:
-        header = bs.find('header', class_='sub-header')
-
-        if header != None:
-            title = header.find('div', class_='inner-wrap')
-            if title != None:
-                if title.h2 != None:
-                    reTitle = rm_tag(title.h2.get_text())
+    if header != None:
+        title = header.find('div', class_='inner-wrap')
+        if title != None:
+            if title.h2 != None:
+                reTitle = rm_tag(title.h2.get_text())
 
     return reTitle
 
 
-def get_desc(service, bs):
+def get_desc(bs):
     reTitle = ""
+    header = bs.find('header', class_='sub-header')
 
-    if service == 'support':
-        body = bs.find('div', class_='notice-body')
-
-        if body != None:
-            reTitle = rm_tag(body.get_text())
-        else:
-            # contact-us
-            body = bs.find('div', class_='heading-msg')
-            if body != None:
-                reTitle = rm_tag(body.h3.get_text())
-    else:
-        header = bs.find('header', class_='sub-header')
-
-        if header != None:
-            title = header.find('div', class_='inner-wrap')
-            if title != None:
-                if title.p != None:
-                    reTitle = rm_tag(title.p.get_text())
-                else:
-                    reTitle = get_desc2(bs)
+    if header != None:
+        title = header.find('div', class_='inner-wrap')
+        if title != None:
+            if title.p != None:
+                reTitle = rm_tag(title.p.get_text())
+            else:
+                reTitle = get_desc2(bs)
 
     return reTitle
 
@@ -146,38 +115,11 @@ def get_desc2(bs):
     return reDesc
 
 
-def get_contents(service, bs, fullPath=None):
+def get_contents(bs):
     reContents = ''
-
-    if service == 'partners':
-        reContents = '삼양데이터시스템, ㈜유더블유에스, 씨앤토트시스템㈜, ㈜도연시스템즈, ㈜솔박스, ㈜브이시스템즈, 주식회사 에이피솔루션즈, 한국컨텐츠인프라, ㈜웰데이타시스템, ㈜써드아이시스템, 주식회사 미르헨지, 에이블컴㈜, ㈜파루씨앤씨, 인프라소프트㈜, ㈜엠아이티마스, 엔키위, SK쉴더스, 퓨처웨어㈜, 코니퍼㈜, ㈜유리시스템, 아이소프트, 동덕정보통신㈜, ㈜솔빛아이텍, ㈜유비벨록스모바일, 코오롱베니트주식회사, ㈜온더아이티, 엘비텍㈜, 인프라닉스㈜, ㈜부뜰정보시스템, ㈜퓨처젠, ㈜비투아시스템즈, 유니원아이앤씨㈜, ㈜에이포유, 그루터기 주식회사, ㈜에이치씨엔씨, ㈜에이에스피엔, ㈜에이텍아이엔에스, 인지테크, ㈜쓰리에이치에스, 웹프라임㈜, ㈜다나테크원, 리눅스데이타시스템, ㈜링네트, 베이넥스, ㈜에이시스, ㈜에즈웰플러스, 인텍앤컴퍼니, 상해아이요넷, 디딤365㈜, ㈜티맥스소프트, 피수닷컴, 펜타시큐리티, 주식회사 피앤피시큐어'
-    elif service == 'about-us' and fullPath.find("sk-cnc.jsp") >= 0:
-        jsonPath = "/home/ec2-user/cloudz/apache-tomcat-9.0.50/webapps/ROOT/assets/data/certificate.json"
-
-        contents = ""
-        with open(jsonPath) as json_file:
-            json_data = json.load(json_file)
-
-            jsonArr = json_data['data']
-            i = 0
-
-            for j in jsonArr:
-                if i > 0:
-                    contents += ","
-
-                contents += j['title']
-
-                ulist = j['ulist']
-                for u in ulist:
-                    contents += "," + u
-
-                i += 1
-
-        reContents = contents
-    else:
-        body = bs.find('div', class_='entry-content')
-        if body != None:
-            reContents = rm_tag(body.get_text())
+    body = bs.find('div', class_='entry-content')
+    if body != None:
+        reContents = rm_tag(body.get_text())
 
     return reContents
 
@@ -229,7 +171,7 @@ def search(dirname):
             Path_copy = copy.deepcopy(fullPath)
 
             # pass page : common
-            if fullPath.find("/common/") >= 0 or fullPath.find("/customer/") >= 0 or fullPath.find("/customerstory/") >= 0 or fullPath.find("/terms/") >= 0 or fullPath.find("/privacy/") >= 0:
+            if fullPath.find("/common/") >= 0 or fullPath.find("/customer/") >= 0 or fullPath.find("/customerstory/") >= 0 or fullPath.find("/about-us/") >= 0 or fullPath.find("/support/") >= 0 or fullPath.find("/terms/") >= 0 or fullPath.find("/partners/") >= 0 or fullPath.find("/privacy/") >= 0:
                 continue
 
             if os.path.isdir(fullPath):
@@ -261,18 +203,6 @@ def search(dirname):
                         if fullPath.find("index.jsp") >= 0 or fullPath.find("sub.jsp") >= 0:
                             continue
 
-                    if fullPath.find("/support") >= 0:
-                        if fullPath.find("index.jsp") >= 0 or fullPath.find("help-desk.jsp") >= 0 or fullPath.find("faq.jsp") >= 0 or fullPath.find("notice-") >= 0:
-                            continue
-
-                    if fullPath.find("/partners") >= 0:
-                        if fullPath.find("become.jsp") >= 0:
-                            continue
-
-                    if fullPath.find("/about-us") >= 0:
-                        if fullPath.find("news.jsp") >= 0:
-                            continue
-
                     service = tmp[0]
 
                 f = open(fullPath, 'r')
@@ -282,9 +212,9 @@ def search(dirname):
 
                 contents = {}
                 contents['service'] = service
-                contents['title'] = get_title(service, bs)
-                contents['description'] = get_desc(service, bs)
-                contents['contents'] = get_contents(service, bs, fullPath)
+                contents['title'] = get_title(bs)
+                contents['description'] = get_desc(bs)
+                contents['contents'] = get_contents(bs)
                 contents['url'] = get_url(filepath, fullPath)
 
                 #print(contents)

@@ -78,14 +78,6 @@ def get_title(service, bs):
             title = header.find('h3')
             if header.h3 != None:
                 reTitle = rm_tag(header.h3.get_text())
-        else:
-            # contact-us
-            header = bs.find('header', class_='sub-header')
-
-            if header != None:
-                title = header.find('h2')
-                if header.h2 != None:
-                    reTitle = rm_tag(header.h2.get_text())
     else:
         header = bs.find('header', class_='sub-header')
 
@@ -106,11 +98,6 @@ def get_desc(service, bs):
 
         if body != None:
             reTitle = rm_tag(body.get_text())
-        else:
-            # contact-us
-            body = bs.find('div', class_='heading-msg')
-            if body != None:
-                reTitle = rm_tag(body.h3.get_text())
     else:
         header = bs.find('header', class_='sub-header')
 
@@ -146,34 +133,11 @@ def get_desc2(bs):
     return reDesc
 
 
-def get_contents(service, bs, fullPath=None):
+def get_contents(service, bs):
     reContents = ''
 
     if service == 'partners':
-        reContents = '삼양데이터시스템, ㈜유더블유에스, 씨앤토트시스템㈜, ㈜도연시스템즈, ㈜솔박스, ㈜브이시스템즈, 주식회사 에이피솔루션즈, 한국컨텐츠인프라, ㈜웰데이타시스템, ㈜써드아이시스템, 주식회사 미르헨지, 에이블컴㈜, ㈜파루씨앤씨, 인프라소프트㈜, ㈜엠아이티마스, 엔키위, SK쉴더스, 퓨처웨어㈜, 코니퍼㈜, ㈜유리시스템, 아이소프트, 동덕정보통신㈜, ㈜솔빛아이텍, ㈜유비벨록스모바일, 코오롱베니트주식회사, ㈜온더아이티, 엘비텍㈜, 인프라닉스㈜, ㈜부뜰정보시스템, ㈜퓨처젠, ㈜비투아시스템즈, 유니원아이앤씨㈜, ㈜에이포유, 그루터기 주식회사, ㈜에이치씨엔씨, ㈜에이에스피엔, ㈜에이텍아이엔에스, 인지테크, ㈜쓰리에이치에스, 웹프라임㈜, ㈜다나테크원, 리눅스데이타시스템, ㈜링네트, 베이넥스, ㈜에이시스, ㈜에즈웰플러스, 인텍앤컴퍼니, 상해아이요넷, 디딤365㈜, ㈜티맥스소프트, 피수닷컴, 펜타시큐리티, 주식회사 피앤피시큐어'
-    elif service == 'about-us' and fullPath.find("sk-cnc.jsp") >= 0:
-        jsonPath = "/home/ec2-user/cloudz/apache-tomcat-9.0.50/webapps/ROOT/assets/data/certificate.json"
-
-        contents = ""
-        with open(jsonPath) as json_file:
-            json_data = json.load(json_file)
-
-            jsonArr = json_data['data']
-            i = 0
-
-            for j in jsonArr:
-                if i > 0:
-                    contents += ","
-
-                contents += j['title']
-
-                ulist = j['ulist']
-                for u in ulist:
-                    contents += "," + u
-
-                i += 1
-
-        reContents = contents
+        reContents = '삼양데이터시스템, ㈜유더블유에스, 씨앤토트시스템㈜, ㈜도연시스템즈, ㈜솔박스, ㈜브이시스템즈, 주식회사 에이피솔루션즈, 한국컨텐츠인프라, ㈜웰데이타시스템, ㈜써드아이시스템, 주식회사 미르헨지, 에이블컴㈜, ㈜파루씨앤씨, 인프라소프트㈜, ㈜엠아이티마스, 엔키위, ADT캡스, 퓨처웨어㈜, 코니퍼㈜, ㈜유리시스템, 아이소프트, 동덕정보통신㈜, ㈜솔빛아이텍, ㈜유비벨록스모바일, 코오롱베니트주식회사, ㈜온더아이티, 엘비텍㈜, 인프라닉스㈜, ㈜부뜰정보시스템, ㈜퓨처젠, ㈜비투아시스템즈, 유니원아이앤씨㈜, ㈜에이포유, 그루터기 주식회사, ㈜에이치씨엔씨, ㈜에이에스피엔, ㈜에이텍아이엔에스, 인지테크, ㈜쓰리에이치에스, 웹프라임㈜, ㈜다나테크원, 리눅스데이타시스템, ㈜링네트, 베이넥스, ㈜에이시스, ㈜에즈웰플러스, 인텍앤컴퍼니, 상해아이요넷, 디딤365㈜, ㈜티맥스소프트, 피수닷컴, 펜타시큐리티, 주식회사 피앤피시큐어'
     else:
         body = bs.find('div', class_='entry-content')
         if body != None:
@@ -200,12 +164,12 @@ def SaveDB():
     cursor = db.cursor()
 
     # truncate search
-    cursor.execute("truncate search")
+    cursor.execute("truncate search_test")
     db.commit()
     print("step 1 : truncate table Success!")
 
     if len(ctLists) > 0:
-        in_sql = "insert into search (service, title, description, contents, url) values(%(service)s, %(title)s, %(description)s, %(contents)s, %(url)s)"
+        in_sql = "insert into search_test (service, title, description, contents, url) values(%(service)s, %(title)s, %(description)s, %(contents)s, %(url)s)"
 
         cursor.executemany(in_sql, ctLists)
         db.commit()
@@ -262,7 +226,7 @@ def search(dirname):
                             continue
 
                     if fullPath.find("/support") >= 0:
-                        if fullPath.find("index.jsp") >= 0 or fullPath.find("help-desk.jsp") >= 0 or fullPath.find("faq.jsp") >= 0 or fullPath.find("notice-") >= 0:
+                        if fullPath.find("index.jsp") >= 0 or fullPath.find("contact-us") >= 0 or fullPath.find("help-desk.jsp") >= 0 or fullPath.find("faq.jsp") >= 0:
                             continue
 
                     if fullPath.find("/partners") >= 0:
@@ -284,7 +248,7 @@ def search(dirname):
                 contents['service'] = service
                 contents['title'] = get_title(service, bs)
                 contents['description'] = get_desc(service, bs)
-                contents['contents'] = get_contents(service, bs, fullPath)
+                contents['contents'] = get_contents(service, bs)
                 contents['url'] = get_url(filepath, fullPath)
 
                 #print(contents)
